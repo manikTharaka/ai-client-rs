@@ -24,31 +24,10 @@ fn main() {
 
     dotenv().ok();
     let api_token = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
-    // let api_token = api_token_result.expect("OPENAI_API_KEY must be set");
 
-    let client = Client::new();
+    let chat_client = api::ChatClient::new(api_token);
+
+    println!("{}", chat_client.completion(message, None, None));
     
-    let test_call: api::APICall = api::get_chat_call(api_token,message, None);
 
-    
-    let resp = client
-        .post(test_call.url)
-        .header(CONTENT_TYPE,test_call.content_type)
-        .header(AUTHORIZATION, test_call.authorization)
-        .json(&test_call.json_body)
-        .send();
-
-    let body = resp
-        .expect("No response")
-        .text()
-        .expect("Failed to read response text");
-    
-    let body: Value = serde_json::from_str(&body).expect("Failed to parse JSON");
-
-    if let Some(content) = body["choices"][0]["message"]["content"].as_str(){
-        println!(">");
-        println!("{}",content);
-    }else{
-        println!("No content found");
-    }
 }
