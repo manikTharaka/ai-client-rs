@@ -1,7 +1,5 @@
 use dotenv::dotenv;
-use reqwest::blocking::Client;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
-use serde_json::Value;
 use clap::Parser;
 
 mod api;
@@ -27,7 +25,7 @@ fn main() {
 
     let chat_client = api::ChatClient::new(api_token);
 
-    println!("{}", chat_client.completion(message, None, None));
-    
 
+    println!("{}", chat_client.completion(message, None, None,None));
+    
 }
