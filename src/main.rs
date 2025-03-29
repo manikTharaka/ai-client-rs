@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use clap::Parser;
-
+use api::Chat;
 mod api;
 
 
@@ -23,8 +23,8 @@ fn main() {
     dotenv().ok();
     let api_token = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
 
-    let chat_client = api::openai_client(api_token);
+    let chat_client = api::OpenAIClient::new(api_token, None, None);
 
-    println!("{}", chat_client.completion(message, None, None,None));
+    println!("{}", chat_client.chat(message));
     
 }
