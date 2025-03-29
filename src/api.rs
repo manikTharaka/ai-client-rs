@@ -2,22 +2,36 @@ use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use serde_json::json;
 use serde_json::Value;
 
+
+
 pub struct ChatClient {
     pub token: String,
     pub url: String,
     req_client: reqwest::blocking::Client,
 }
 
+pub fn openai_client(api_token:String) -> ChatClient {
+    let url = "https://api.openai.com/v1/chat/";
+    ChatClient::new(api_token,url.to_string())
+}
+
+pub fn gemini_client(api_token:String) -> ChatClient {
+    //WIP
+    let url = "https://generativelanguage.googleapis.com/v1beta/";
+    ChatClient::new(api_token,url.to_string())
+}
+
 impl ChatClient {
-    pub fn new(token: String) -> ChatClient {
+    pub fn new(token: String,url:String) -> ChatClient {
         ChatClient {
-            token: token,
-            url: String::from("https://api.openai.com/v1/chat/"),
+            token,
+            url,
             req_client: reqwest::blocking::Client::new(),
         }
     }
-
-    pub fn listCompletions(&self) -> String {
+    
+    
+    pub fn list_completions(&self) -> String {
         let api_call: APICall = APICall {
             url: self.url.clone() + "completions",
             content_type: String::from("application/json"),
@@ -81,6 +95,7 @@ impl ChatClient {
             .expect("No response")
             .text()
             .expect("Failed to read response text");
+        
 
         let body: Value = serde_json::from_str(&body).expect("Failed to parse JSON");
 
@@ -91,6 +106,7 @@ impl ChatClient {
         }
     }
 }
+#[derive(Debug)]
 pub struct APICall {
     pub url: String,
     pub content_type: String,

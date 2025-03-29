@@ -23,8 +23,7 @@ fn main() {
     dotenv().ok();
     let api_token = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set");
 
-    let chat_client = api::ChatClient::new(api_token);
-
+    let chat_client = api::openai_client(api_token);
 
     println!("{}", chat_client.completion(message, None, None,None));
     
