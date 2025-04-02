@@ -42,6 +42,25 @@ impl OpenAIClient {
     }
 }
 
+impl GeminiClient{
+    pub fn new(
+        token: String,
+        model: Option<String>,
+        system_prompt: Option<String>,
+    ) -> GeminiClient {
+        GeminiClient {
+            url: String::from("https://generativelanguage.googleapis.com/v1beta/"),
+            store: false,
+            client: ChatClient {
+                token,
+                system_prompt: system_prompt
+                    .unwrap_or(String::from("You are a helpful assistant.")),
+                model: model.unwrap_or(String::from("gpt-4o")),
+                request: reqwest::blocking::Client::new(),
+            },
+        }
+    }
+}
 
 
 pub trait Chat {
@@ -76,6 +95,48 @@ impl Chat for OpenAIClient {
             .post(api_call.url)
             .header(CONTENT_TYPE, api_call.content_type)
             .header(AUTHORIZATION, api_call.authorization)
+            .json(&api_call.json_body)
+            .send();
+
+        let body = resp
+            .expect("No response")
+            .text()
+            .expect("Failed to read response text");
+
+        let body: Value = serde_json::from_str(&body).expect("Failed to parse JSON");
+
+        if let Some(content) = body["choices"][0]["message"]["content"].as_str() {
+            return content.to_string();
+        } else {
+            return String::from("No content found");
+        }
+    }
+}
+
+impl Chat for GeminiClient{
+    fn chat(&self, message: String) -> String {
+        let api_call: APICall = APICall {
+            url: self.url.clone() + "models/" + self.client.model.as_str() + ":generateContent?key=" + self.client.token.as_str(),
+            content_type: String::from("application/json"),
+            authorization: "".to_string(),
+            json_body: json!({
+                "contents": [
+                    {
+                      "parts": [
+                        {
+                          "text": message
+                        }
+                      ]
+                    }
+                  ]
+            }),
+        };
+
+        let resp = self
+            .client
+            .request
+            .post(api_call.url)
+            .header(CONTENT_TYPE, api_call.content_type)
             .json(&api_call.json_body)
             .send();
 
